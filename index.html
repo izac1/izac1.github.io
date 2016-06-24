@@ -1,0 +1,217 @@
+<html>
+
+<head>
+    <title>1234</title>
+    <script src="http://maurizzzio.github.io/greuler/scripts/lib/d3.js"></script>
+    <script src="http://maurizzzio.github.io/greuler/scripts/lib/cola.v3.js"></script>
+    <script src="http://maurizzzio.github.io/greuler/greuler.min.js"></script>
+</head>
+
+<body>
+    <div class="test">
+    </div>
+    <span>Order:</span><br/>
+    <span id="co"></span><br/>
+    <span id="ord"></span><br/>
+    <a href="#" onclick="abs();">go</a>
+</body>
+<script>
+    'use strict';
+
+    (function() {
+        int();
+
+    })();
+
+
+    var instance;
+    var greuler;
+
+    function int() {
+
+        greuler = window.greuler;
+        instance = greuler({
+            target: '.test',
+            height: 500,
+            animationTime: 450,
+            data: {
+                nodes: [{
+                    id: 0
+                }, {
+                    id: 1
+                }, {
+                    id: 2
+                }, {
+                    id: 3
+                }, {
+                    id: 4
+                }, {
+                    id: 5
+                }, {
+                    id: 6
+                }, {
+                    id: 7
+                }, {
+                    id: 8
+                }, {
+                    id: 9
+                }],
+                links: [
+
+                    {
+                        source: 0,
+                        target: 1,
+                        directed: true
+                    }, {
+                        source: 0,
+                        target: 4,
+                        directed: true
+                    }, {
+                        source: 1,
+                        target: 2,
+                        directed: true
+                    }, {
+                        source: 2,
+                        target: 9,
+                        directed: true
+                    }, {
+                        source: 3,
+                        target: 0,
+                        directed: true
+                    }, {
+                        source: 3,
+                        target: 4,
+                        directed: true
+                    }, {
+                        source: 4,
+                        target: 2,
+                        directed: true
+                    }, {
+                        source: 5,
+                        target: 3,
+                        directed: true
+                    }, {
+                        source: 6,
+                        target: 5,
+                        directed: true
+                    }, {
+                        source: 7,
+                        target: 6,
+                        directed: true
+                    }, {
+                        source: 7,
+                        target: 2,
+                        directed: true
+                    }, {
+                        source: 8,
+                        target: 6,
+                        directed: true
+                    }, {
+                        source: 7,
+                        target: 9,
+                        directed: true
+                    },
+
+                ]
+            }
+        }).update();
+    }
+
+    function abs() {
+        var player = new greuler.player.Generator(instance);
+        player.run(function* algorithm(instance) {
+            var visited = [];
+            var black = [];
+
+            function* dfs(u, p) {
+                yield function() {
+                    instance.selector.highlightNode({
+                            id: u
+                        })
+                        .transition()
+                        .attr('fill', 'green');
+                };
+                visited[u] = true;
+
+                var adjacent = instance.graph.getIncidentEdges({
+                    id: u
+                });
+                for (var i = 0; i < adjacent.length; i += 1) {
+
+                    var v = adjacent[i].target.id;
+
+                    if (v === p) {
+                        continue;
+                    }
+
+                    if (!visited[v]) {
+                        yield function() {
+
+                            instance.selector.traverseAllEdgesBetween({
+                                source: u,
+                                target: v
+                            });
+
+                        };
+                        yield * dfs(v, u);
+                    } else if (v != u && visited[v] === true && black.indexOf(v) === -1) {
+                        instance.selector.traverseAllEdgesBetween({
+                            source: u,
+                            target: v
+                        });
+                        throw new Error("Cycle");
+
+                    } else {
+                        yield function() {
+                            instance.selector.traverseAllEdgesBetween({
+                                    source: u,
+                                    target: v
+                                }, {
+                                    keepStroke: false
+                                })
+                                .transition()
+                                .attr('opacity', 0.3);
+                        };
+                    }
+                }
+
+                yield function() {
+                    instance.selector.getNode({
+                            id: u
+                        })
+                        .transition()
+                        .attr('fill', 'black');
+                };
+                black.push(u);
+            }
+
+            try {
+                yield * dfs(0);
+
+                for (var itm of instance.selector.graph.nodes) {
+                    if (black.indexOf(itm.id) === -1) {
+                        yield * dfs(itm.id);
+                    }
+                }
+                yield function() {
+                    var b = black.reverse();
+                    for (var i = 0; i < b.length; i++) {
+                        var q = document.getElementById('co').innerHTML;
+                        if (q != "")
+                            q = q + ' , ';
+                        document.getElementById('co').innerHTML = q + (i + 1);
+                        var h = document.getElementById('ord').innerHTML;
+                        if (h != "")
+                            h = h + ' , ';
+                        document.getElementById('ord').innerHTML = h + b[i];
+                    }
+
+                };
+            } catch (err) {
+                alert(err);
+            }
+        });
+    };
+</script>
+
+</html>
