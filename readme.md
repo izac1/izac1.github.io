@@ -9,6 +9,8 @@
 Установка:
 Запустить файл index.html  в браузере.
 
+[Демо](https://izac1.github.io)
+
 
 [ENG]
 ----
@@ -21,4 +23,5 @@ Library for visualization [greuler](https://github.com/maurizzzio/greuler)
 Installation:
 To run the file index.html in the browser.
 
+[Demo](https://izac1.github.io)
 
